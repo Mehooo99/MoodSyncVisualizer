@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Mood Sync Visualizer</title>
+    <link rel="stylesheet" href="./src/style.css">
+</head>
+<body>
+    <div id="app">
+        <canvas id="visualizer"></canvas>
+        <div class="glass-ui">
+            <h1>Mood Sync</h1>
+            <input type="file" id="audio-file" accept="audio/*">
+            <audio id="audio-player" crossorigin="anonymous"></audio>
+            <button id="start-btn">Connect & Play</button>
+            <p id="status">Upload a track to begin</p>
+        </div>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
