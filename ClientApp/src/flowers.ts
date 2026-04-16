@@ -6,7 +6,19 @@ export class ReactiveFlower {
         // Fans the flowers out in a bouquet shape
         this.angle = ((index / (total - 1)) - 0.5) * Math.PI * 0.6;
     }
-
+public getTipCoordinates(canvas: HTMLCanvasElement, intensity: number) {
+        const originX = canvas.width / 2;
+        const originY = canvas.height + 10;
+        
+        // Use the same length math as the draw() method
+        const baseLength = canvas.height * 0.5;
+        const currentLength = baseLength + (intensity * 40);
+        
+        return {
+            x: originX + Math.sin(this.angle) * currentLength,
+            y: originY - Math.cos(this.angle) * currentLength
+        };
+    }
     public draw(ctx: CanvasRenderingContext2D, intensity: number, canvas: HTMLCanvasElement) {
         const originX = canvas.width / 2;
         const originY = canvas.height + 10;
@@ -17,6 +29,7 @@ export class ReactiveFlower {
         
         const tipX = originX + Math.sin(this.angle) * currentLength;
         const tipY = originY - Math.cos(this.angle) * currentLength;
+const coords = this.getTipCoordinates(canvas, intensity);
 
         // 1. Draw the Stem
         ctx.beginPath();
@@ -43,8 +56,8 @@ export class ReactiveFlower {
         ctx.rotate(this.angle); // Aligns heart with the stem direction
 
         // Glow effect
-        ctx.shadowBlur = 10 + (intensity * 25);
-        ctx.shadowColor = "rgba(255, 77, 109, 0.6)";
+        ctx.shadowBlur = 10 + (intensity * 20);
+        // ctx.shadowColor = "rgba(255, 77, 109, 0.6)";
 
         ctx.beginPath();
         // Starting at the bottom point of the heart
