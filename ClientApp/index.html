@@ -7,12 +7,25 @@
 </head>
 <body>
     <div id="app">
+
         <canvas id="visualizer"></canvas>
+        <div class="hud">
+    <div class="stat-row">
+        <span>ONLINE FLOWERS:</span>
+        <span id="user-count" class="highlight">1</span>
+    </div>
+    <div class="meter-label">BASS INTENSITY</div>
+    <div class="meter-container">
+        <div id="intensity-bar" class="meter-fill"></div>
+    </div>
+</div>
         <div class="glass-ui">
             <h1>Mood Sync</h1>
             <input type="file" id="audio-file" accept="audio/*">
             <audio id="audio-player" crossorigin="anonymous"></audio>
             <button id="start-btn">Connect & Play</button>
+            <button id="stop-btn" class="secondary">Stop</button>
+
             <p id="status">Upload a track to begin</p>
         </div>
     </div>

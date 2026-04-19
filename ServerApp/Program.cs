@@ -22,7 +22,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 app.UseCors();
-app.MapHub<VisualizerHub>("/visualizerHub");
+app.MapHub<VisualizerHub>("visualizerHub");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
