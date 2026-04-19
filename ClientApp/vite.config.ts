@@ -5,6 +5,6 @@ export default defineConfig({
   base: './', 
   root: './',
   build: {
-    outDir: 'dist',
+    outDir: 'node_modules/vite/dist',
   }
 });
