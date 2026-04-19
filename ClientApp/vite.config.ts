@@ -1,10 +1,11 @@
 import { defineConfig } from 'vite';
+import path from 'path';
 
 export default defineConfig({
-  // This makes sure your JS and CSS paths load correctly on GitHub
-  base: './', 
-  root: './',
+  base: './',
   build: {
-    outDir: 'node_modules/vite/dist',
+    // This forces the 'dist' folder to appear inside ClientApp
+    outDir: 'dist', 
+    emptyOutDir: true,
   }
 });
