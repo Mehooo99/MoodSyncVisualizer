@@ -1,6 +1,5 @@
 export class ReactiveFlower {
     private angle: number;
-    private bloomScale: number = 0;
     private _index: number;
     private _total: number;
 
@@ -23,7 +22,7 @@ public getTipCoordinates(canvas: HTMLCanvasElement, intensity: number) {
             y: originY - Math.cos(this.angle) * currentLength
         };
     }
-    public draw(ctx: CanvasRenderingContext2D, intensity: number, canvas: HTMLCanvasElement,isMine:boolean) {
+    public draw(ctx: CanvasRenderingContext2D, intensity: number, canvas: HTMLCanvasElement) {
        const originX = canvas.width / 2;
     const originY = canvas.height + 10;
     
@@ -43,7 +42,6 @@ public getTipCoordinates(canvas: HTMLCanvasElement, intensity: number) {
     let tipX = originX + Math.sin(currentAngle) * currentLength;
     tipX = Math.max(padding, Math.min(canvas.width - padding, tipX));
     const tipY = originY - Math.cos(currentAngle) * currentLength;
-const coords = this.getTipCoordinates(canvas, intensity);
 
 const fanIndex = this._total > 1 ? this._index : 0;
     const fanTotal = this._total > 1 ? this._total - 1 : 1;
