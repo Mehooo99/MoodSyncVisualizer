@@ -52,7 +52,7 @@ function init() {
 
     // 3. Check if we hit the heart
     const intersects = raycaster.intersectObject(heartMesh);
-
+window.onload = startIntroSequence;
     if (intersects.length > 0) {
         togglePlayPause();
     }
@@ -227,4 +227,67 @@ function onResize() {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
 
-init();
+async function startIntroSequence() {
+    const textContainer = document.getElementById('intro-text') as HTMLElement;
+    const overlay = document.getElementById('intro-container') as HTMLElement;
+
+    // Helper to run one "Slam" cycle
+  async function slamSequence(newText: string) {
+    const textContainer = document.getElementById('intro-text') as HTMLElement;
+    const coreText = document.getElementById('core-text') as HTMLElement;
+
+    if (!textContainer || !coreText) return;
+
+    // --- PHASE 1: THE SLOW SQUEEZE ---
+    // Bars move in, letters huddle, and the word gets "thinner"
+    textContainer.style.gap = "0px";
+    coreText.style.letterSpacing = "-5px"; // Letters huddle
+    coreText.style.transform = "scaleX(0.7) scaleY(1.1)"; // Squashed look
+    
+    // Wait for the slow 2s movement to finish
+    await new Promise(res => setTimeout(res, 2000));
+
+    // --- PHASE 2: THE TRANSFORMATION (POP) ---
+    // Change the word and briefly "Pop" it to show the change
+    coreText.innerHTML = newText;
+    coreText.style.transform = "scale(1.4)"; // Sudden expansion
+    coreText.style.letterSpacing = "2px";
+    
+    await new Promise(res => setTimeout(res, 400));
+
+    // --- PHASE 3: THE RECOIL ---
+    // Return everything to the original elegant state
+    textContainer.style.gap = "20px";
+    coreText.style.letterSpacing = "5px";
+    coreText.style.transform = "scale(1)"; 
+
+    // Wait for the bars to finish moving out before next sequence
+    await new Promise(res => setTimeout(res, 2000));
+}
+
+    // --- The actual timeline ---
+    
+    await new Promise(res => setTimeout(res, 1500)); // Initial wait
+
+    // Step 1: i love you -> i ❤️ you
+    await slamSequence('i <span class="heart-icon">❤️</span> you');
+
+    await new Promise(res => setTimeout(res, 1000));
+
+    // Step 2: i ❤️ you -> i ❤️ u
+    await slamSequence('i <span class="heart-icon">❤️</span> u');
+
+    await new Promise(res => setTimeout(res, 1000));
+
+    // Final Step: Complete Collapse into 3D Reveal
+    textContainer.style.gap = "0px";
+    // coreText.innerHTML = '<span class="heart-icon" style="font-size: 5rem;">❤️</span>';
+    await slamSequence('<span class="heart-icon" style="font-size: 5rem;">❤️</span>');
+    // document.querySelectorAll('.bar').forEach(b => (b as HTMLElement).style.opacity = '0');
+
+    setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => {init(); overlay.style.display = 'none'; }, 1500);
+    }, 2000);
+}
+window.addEventListener('DOMContentLoaded', startIntroSequence);
