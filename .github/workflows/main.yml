@@ -2,7 +2,7 @@ name: Deploy Jewelry App
 
 on:
   push:
-    branches: [ addHeartShape ] # Change this to your branch name if it's not main
+    branches: [ main ] # Change this to your branch name if it's not main
 
 permissions:
   contents: read
