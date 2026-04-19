@@ -8,5 +8,12 @@ export default defineConfig({
     // This forces the output folder to be created
     outDir: 'dist',
     emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        // Main page
+        main: './index.html',
+  jewelry: './jewelry.html'
+      },
+    },
   }
 });
