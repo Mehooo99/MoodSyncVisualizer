@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { gsap } from 'gsap'; // Ensure you ran: npm install gsap
 
 let scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer;
 let heartMesh: THREE.Mesh, particleSystem: THREE.Group;
@@ -12,7 +13,24 @@ const container = document.getElementById('canvas-container') as HTMLElement;
 const upload = document.getElementById('audio-upload') as HTMLInputElement;
 const contDev = document.getElementsByClassName('controls')[0] as HTMLElement;
 
+
+let particlesGeometry: THREE.BufferAttribute;
+let dollarPoints: THREE.Vector3[] = [];
+let heartPoints: THREE.Vector3[] = [];
+let currentShape: 'heart' | 'dollar' = 'heart';
+let dollarMesh: THREE.Mesh;
+let dollarParticles: THREE.Object3D; // Particles for the $ sign
+let heartParticles: THREE.Object3D;  // Particles for the Heart (your original system)
+const particleCount = 2000;
+
+
 function init() {
+
+    initShapes(); // Important!
+    // ... your existing scene/camera/renderer code ...
+    
+    const btn = document.getElementById('accountant-toggle');
+    btn?.addEventListener('click', toggleShape);
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
     camera.position.z = 12;
@@ -38,10 +56,18 @@ function init() {
     heartMesh = createJewelHeart();
     scene.add(heartMesh);
 
-    // 3. THE HEART-SHAPED PARTICLE PATH
-    particleSystem = createHeartPathParticles();
+
+dollarMesh = createJewelDollar();
+scene.add(dollarMesh);
+
+    heartParticles = createHeartPathParticles();
     //scene.add(particleSystem);
-    heartMesh.add(particleSystem);
+    heartMesh.add(heartParticles);
+
+    dollarParticles = createDollarPathParticles(); // Now it will find the name!
+    dollarMesh.add(dollarParticles);
+    // 3. THE HEART-SHAPED PARTICLE PATH
+    
 
     window.addEventListener('pointerdown', (event) => {
     // 1. Calculate mouse position in "Normalized Device Coordinates" (-1 to +1)
@@ -52,12 +78,23 @@ function init() {
     raycaster.setFromCamera(mouse, camera);
 
     // 3. Check if we hit the heart
-    const intersects = raycaster.intersectObject(heartMesh);
-window.onload = startIntroSequence;
+    const intersects = raycaster.intersectObjects([heartMesh, dollarMesh]);
     if (intersects.length > 0) {
         togglePlayPause();
     }
+window.onload = startIntroSequence;
+    
 });
+
+// Ensure dollar items start invisible
+    dollarMesh.scale.set(0, 0, 0);
+    (dollarMesh.material as THREE.Material).opacity = 0;
+    
+    // Force dollar particles to start invisible
+    dollarParticles.children.forEach(p => {
+        ((p as THREE.Mesh).material as THREE.Material).opacity = 0;
+    });
+
 
     window.addEventListener('resize', onResize);
     animate();
@@ -88,33 +125,30 @@ function createJewelHeart(): THREE.Mesh {
     return new THREE.Mesh(geometry, material);
 }
 
-function createHeartPathParticles(): THREE.Group {
-    const group = new THREE.Group();
-    const particleCount = 2000; // Much higher density
-    
-    // Make particles even smaller so they look like fine glitter
-    const geo = new THREE.SphereGeometry(0.015, 4, 4); 
+function createHeartPathParticles(): THREE.Points {
+    const geometry = new THREE.BufferGeometry();
+    const positions = new Float32Array(particleCount * 3);
 
-    for (let i = 0; i < particleCount; i++) {
-        const mat = new THREE.MeshBasicMaterial({ 
-            color: 0xffffff, 
-            transparent: true,
-            blending: THREE.AdditiveBlending // Makes overlapping particles glow brighter
-        });
-        
-        const p = new THREE.Mesh(geo, mat);
-        
-        p.userData = { 
-            t: Math.random(), 
-            speed: 0.005 + Math.random() * 0.01,
-            // Add unique jitter values so they stay spread out
-            driftX: (Math.random() - 0.5) * 0.8,
-            driftY: (Math.random() - 0.5) * 0.8,
-            driftZ: (Math.random() - 0.5) * 1.5
-        };
-        group.add(p);
-    }
-    return group;
+    // Initial positions start at Heart
+    heartPoints.forEach((p, i) => {
+        positions[i * 3] = p.x;
+        positions[i * 3 + 1] = p.y;
+        positions[i * 3 + 2] = p.z;
+    });
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    particlesGeometry = geometry.getAttribute('position') as THREE.BufferAttribute;
+
+    const mat = new THREE.PointsMaterial({ 
+        color: 0xffffff, 
+        size: 0.05,
+        transparent: true,
+        blending: THREE.AdditiveBlending 
+    });
+
+    const points = new THREE.Points(geometry, mat);
+    points.frustumCulled = false;
+    return points;
 }
 
 // Heart Path Formula (Parametric)
@@ -131,45 +165,58 @@ function animate() {
 
     let intensity = 0;
     
-    // Only calculate music data if not paused
+    // 1. MUSIC DATA: Get the volume/frequency data
     if (isPlaying && analyser && !isPaused) {
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
         analyser.getByteFrequencyData(dataArray);
+        // Calculate average intensity (0 to 1)
         intensity = dataArray.reduce((a, b) => a + b, 0) / (dataArray.length * 128);
     }
-
-    // SPEED LOGIC
-    let targetSpeed = 0;
-    if (!isPaused) {
-        // If not paused, use our slow idle or fast active speed
-        targetSpeed = 0.005 + (intensity * 0.15 );
-    } else {
-        // If paused, target speed is zero
-        targetSpeed = 0;
-    }
-
-    // Lerp to the target speed (makes the stop feel smooth, not jerky)
-    currentSpeed = THREE.MathUtils.lerp(currentSpeed, targetSpeed, 0.1);
-
-    // Apply rotation and particle movement
-    heartMesh.rotation.y += currentSpeed;
-    
-    particleSystem.children.forEach((obj) => {
+heartParticles.children.forEach((obj) => {
         const p = obj as THREE.Mesh;
         const d = p.userData;
         d.t += currentSpeed * 0.05;
         if (d.t > 1) d.t = 0;
-        
-        const pos = getHeartPoint(d.t);
-        p.position.x = pos.x + d.driftX;
-        p.position.y = pos.y + d.driftY;
-        p.position.z = d.driftZ;
+        const pos = getHeartPoint(d.t); // Your heart math
+        p.position.set(pos.x + d.driftX, pos.y + d.driftY, d.driftZ);
     });
 
-    // Pulse only works when music is playing
-    const targetScale1 = isPaused ? 1 : 1 + (intensity * 0.2);
-    heartMesh.scale.lerp(new THREE.Vector3(targetScale1, targetScale1, targetScale1), 0.1);
+    // Move Dollar Particles (New Logic)
+dollarParticles.children.forEach((obj) => {
+        const p = obj as THREE.Mesh;
+        const d = p.userData;
+        d.t += currentSpeed * 0.2; 
+        if (d.t > 1) d.t = 0;
+        const pos = getDollarPoint(d.t); // Use the new segment math
+        p.position.set(pos.x + d.driftX, pos.y + d.driftY, d.driftZ);
+    });
+    // 2. SPEED: Calculate how fast to spin (0.005 is idle, goes up with music)
+    let targetSpeed = isPaused ? 0 : 0.005 + (intensity * 0.15);
+    currentSpeed = THREE.MathUtils.lerp(currentSpeed, targetSpeed, 0.1);
 
+    // 3. ROTATION: Rotate the main heart and the particle cloud
+    heartMesh.rotation.y += currentSpeed;
+    dollarMesh.rotation.y += currentSpeed;
+    // if (particleSystem) {
+    //     particleSystem.rotation.y += 0.01;
+    // }
+
+    // 4. SYNC DATA: This is crucial! Tells Three.js to show the morphing 
+    // progress happening in the GSAP toggle function.
+    if (particlesGeometry) {
+        particlesGeometry.needsUpdate = true;
+    }
+
+    // 5. PULSE: Scale the heart mesh based on the music beat
+    // const targetScale = isPaused ? 1 : 1 + (intensity * 0.2);
+    // heartMesh.scale.lerp(new THREE.Vector3(targetScale, targetScale, targetScale), 0.1);
+
+const pulse = 1 + (intensity * 0.2);
+    if (currentShape === 'heart') {
+        heartMesh.scale.lerp(new THREE.Vector3(pulse, pulse, pulse), 0.1);
+    } else {
+        dollarMesh.scale.lerp(new THREE.Vector3(pulse, pulse, pulse), 0.1);
+    }
     renderer.render(scene, camera);
 }
 
@@ -297,9 +344,189 @@ async function startIntroSequence() {
 }
 function showSurprise() {
     const modal = document.getElementById('surprise-modal');
+    const ledger = document.getElementById('ledger-modal');
+    if (currentShape === 'dollar') {
+        // Show the Accountant Surprise
+        if (ledger) ledger.style.display = 'block';
+    } else {
     if(modal) modal.style.display = 'block';
+    }
 }
+function initShapes() {
+    for (let i = 0; i < particleCount; i++) {
+        const t = i / particleCount;
 
+        // Heart Math (Parametric)
+        const angle = t * Math.PI * 2;
+        const hX = 16 * Math.pow(Math.sin(angle), 3) * 0.4;
+        const hY = (13 * Math.cos(angle) - 5 * Math.cos(2 * angle) - 2 * Math.cos(3 * angle) - Math.cos(4 * angle)) * 0.4;
+        heartPoints.push(new THREE.Vector3(hX, hY, (Math.random() - 0.5) * 1.5));
 
+        // Dollar Math
+        const sT = (t < 0.2) ? (t / 0.2) : (t - 0.2) / 0.8; 
+        if (t < 0.2) {
+            dollarPoints.push(new THREE.Vector3(0, (sT * 8 - 4), (Math.random() - 0.5) * 1.5));
+        } else {
+            const sAngle = sT * Math.PI * 2.5;
+            const dX = Math.sin(sAngle) * 3;
+            const dY = (sT * 10 - 5);
+            dollarPoints.push(new THREE.Vector3(dX, dY, (Math.random() - 0.5) * 1.5));
+        }
+    }
+}
+function toggleShape() {
+    const isToDollar = currentShape === 'heart';
+    const auditGrid = document.getElementById('audit-grid');
 
+    if (isToDollar) {
+        // EXIT HEART
+        gsap.to(heartMesh.scale, { x: 0, y: 0, z: 0, duration: 1 });
+        heartParticles.children.forEach(p => {
+            gsap.to((p as THREE.Mesh).material, { opacity: 0, duration: 0.5 });
+        });
+
+        // ENTER DOLLAR
+        gsap.to(dollarMesh.scale, { x: 1, y: 1, z: 1, duration: 1.2, delay: 0.3 });
+        gsap.to(dollarMesh.material, { opacity: 0.9, metalness: 1, roughness: 0.1, duration: 1.5 });
+        dollarParticles.children.forEach(p => {
+            gsap.to((p as THREE.Mesh).material, { opacity: 1, duration: 1, delay: 0.5 });
+        });
+        gsap.to(dollarMesh.rotation, { y: Math.PI * 2, duration: 1, delay: 0.2 });
+        
+        currentShape = 'dollar';
+        // Show the Audit Grid
+        if (auditGrid) auditGrid.style.opacity = "1";
+        
+        // Optional: Make the background slightly lighter green-grey
+        document.body.style.backgroundColor = "#0a0f0c";
+    } else {
+        // EXIT DOLLAR
+        gsap.to(dollarMesh.scale, { x: 0, y: 0, z: 0, duration: 1 });
+        dollarParticles.children.forEach(p => {
+            gsap.to((p as THREE.Mesh).material, { opacity: 0, duration: 0.5 });
+        });
+
+        // ENTER HEART
+        gsap.to(heartMesh.scale, { x: 1, y: 1, z: 1, duration: 1.2, delay: 0.3 });
+        gsap.to(heartMesh.material, { opacity: 0.9, metalness: 0, roughness: 0.5, duration: 1.5 });
+        heartParticles.children.forEach(p => {
+            gsap.to((p as THREE.Mesh).material, { opacity: 1, duration: 1, delay: 0.5 });
+        });
+        
+        currentShape = 'heart';
+        // Hide the Audit Grid
+        if (auditGrid) auditGrid.style.opacity = "0";
+        
+        // Back to Romantic Black
+        document.body.style.backgroundColor = "#000000";
+    }
+}
+function createJewelDollar(): THREE.Mesh {
+    const dollarGroup = new THREE.Group();
+
+    // 1. MATERIAL: Using the "Excel" Green you wanted for the accountant theme
+    const material = new THREE.MeshPhongMaterial({
+        color: 0x217346,
+        emissive: 0x0a2212,
+        specular: 0xffffff,
+        shininess: 100,
+        flatShading: true, // Crucial for the "Jewel" facet effect
+        transparent: true,
+        opacity: 0
+    });
+
+    // 2. THE "S" SEGMENTS: Using Boxes to ensure it looks sharp and digital
+    const horizontalGeo = new THREE.BoxGeometry(5, 1.5, 0.8);
+    const verticalGeo = new THREE.BoxGeometry(1.5, 3, 0.8);
+
+    // Top Bar
+    const topBar = new THREE.Mesh(horizontalGeo, material);
+    topBar.position.y = 4;
+    
+    // Middle Bar
+    const midBar = new THREE.Mesh(horizontalGeo, material);
+    midBar.position.y = 0;
+
+    // Bottom Bar
+    const botBar = new THREE.Mesh(horizontalGeo, material);
+    botBar.position.y = -4;
+
+    // Top-Left Connector
+    const topLeft = new THREE.Mesh(verticalGeo, material);
+    topLeft.position.set(-1.75, 2, 0);
+
+    // Bottom-Right Connector
+    const botRight = new THREE.Mesh(verticalGeo, material);
+    botRight.position.set(1.75, -2, 0);
+
+    // 3. THE VERTICAL STRIKE (The "Money" Line)
+    const strikeGeo = new THREE.BoxGeometry(0.8, 12, 1.2); // Slightly deeper to stand out
+    const strike = new THREE.Mesh(strikeGeo, material);
+
+    // Add all parts to a single group
+    dollarGroup.add(topBar, midBar, botBar, topLeft, botRight, strike);
+
+    // Wrap the group in a Mesh-like container for your existing logic
+    const wrapper = new THREE.Mesh(); 
+    wrapper.add(dollarGroup);
+    wrapper.scale.set(0, 0, 0);
+    
+    // We assign the material to the wrapper so GSAP can find it
+    wrapper.material = material; 
+    
+    return wrapper;
+}
+function getDollarPoint(t: number) {
+    // We divide t (0 to 1) into 6 sections
+    if (t < 0.2) {
+        // 1. The Vertical Strike (Center Line)
+        const p = t / 0.2;
+        return { x: 0, y: 12 * p - 6 }; 
+    } else if (t < 0.36) {
+        // 2. Top Curve/Bar
+        const p = (t - 0.2) / 0.16;
+        return { x: 4 * Math.cos(p * Math.PI), y: 5 + Math.sin(p * Math.PI) * 0.5 };
+    } else if (t < 0.52) {
+        // 3. Top-Left Vertical
+        const p = (t - 0.36) / 0.16;
+        return { x: -4, y: 5 - 5 * p };
+    } else if (t < 0.68) {
+        // 4. Middle Bar
+        const p = (t - 0.52) / 0.16;
+        return { x: -4 + 8 * p, y: 0 };
+    } else if (t < 0.84) {
+        // 5. Bottom-Right Vertical
+        const p = (t - 0.68) / 0.16;
+        return { x: 4, y: 0 - 5 * p };
+    } else {
+        // 6. Bottom Curve/Bar
+        const p = (t - 0.84) / 0.16;
+        return { x: 4 * Math.cos(p * Math.PI + Math.PI), y: -5 - Math.sin(p * Math.PI) * 0.5 };
+    }
+}
+function createDollarPathParticles(): THREE.Group {
+    const group = new THREE.Group();
+    const particleCount = 2000; 
+    const geo = new THREE.SphereGeometry(0.015, 4, 4); 
+
+    for (let i = 0; i < particleCount; i++) {
+       const mat = new THREE.MeshBasicMaterial({ 
+            color: 0xccffcc, // Very light green glitter
+            transparent: true, 
+            opacity: 0, 
+            blending: THREE.AdditiveBlending 
+        });
+        const p = new THREE.Mesh(geo, mat);
+        
+        p.userData = { 
+            t: Math.random(), 
+            speed: 0.005 + Math.random() * 0.01,
+            driftX: (Math.random() - 0.5) * 0.8,
+            driftY: (Math.random() - 0.5) * 0.8,
+            driftZ: (Math.random() - 0.5) * 1.5
+        };
+        group.add(p);
+    }
+    return group;
+}
 window.addEventListener('DOMContentLoaded', startIntroSequence);

@@ -63,3 +63,62 @@ button.secondary:hover {
 .stat-row , .meter-label{
     color: #ff4d6d;
 }
+#audit-grid {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none; /* User can click through it to hit the 3D objects */
+    z-index: -1; /* Keep it behind the canvas */
+    opacity: 0;
+    transition: opacity 1.5s ease;
+    
+    /* The "Accounting" Grid Look */
+    background-image: 
+        linear-gradient(rgba(33, 115, 70, 0.1) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(33, 115, 70, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+}
+
+/* Optional: Add a "Ledger" line every 5 grid squares */
+#audit-grid::after {
+    content: "ميزانية الحب / تدقيق";
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    color: rgba(33, 115, 70, 0.1);
+    font-size: 40px;
+    font-weight: bold;
+    transform: rotate(-15deg);
+}
+@keyframes gridMove {
+    from { background-position: 0 0; }
+    to { background-position: 30px 30px; }
+}
+@keyframes scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+#audit-grid::before {
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 2px;
+    background: rgba(33, 115, 70, 0.3);
+    top: 0;
+    left: 0;
+    animation: scanline 4s linear infinite;
+    display: none;
+}
+
+/* Show the scanline when the grid is visible */
+#audit-grid[style*="opacity: 1"]::before {
+    display: block;
+}
+.accounting-grid {
+    background-image: linear-gradient(#21734622 1px, transparent 1px), 
+                      linear-gradient(90deg, #21734622 1px, transparent 1px);
+    background-size: 20px 20px;
+}

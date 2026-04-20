@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="./src/jewelry.css">
 </head>
 <body>
+    <div id="audit-grid"></div>
     <div id="visualizer-container"></div>
 
     <div id="canvas-container"></div>
@@ -41,6 +42,43 @@
     <button onclick="document.getElementById('surprise-modal').style.display='none'" style="margin-top: 15px; width: 100%; cursor: pointer; border: none; background: #ccc; padding: 5px;">إغلاق التقرير</button>
 </div>
 
+<div id="ledger-modal" dir="rtl" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:white; color:#1a1a1a; padding:30px; border-radius:8px; box-shadow:0 20px 50px rgba(0,0,0,0.5); z-index:2000; font-family: 'Arial', sans-serif; width:90%; max-width:500px; text-align:right;">
+    <h2 style="border-bottom:2px solid #217346; color:#217346; margin-top:0; font-size: 24px;">تقرير التدقيق المالي</h2>
+    <p><strong>الكيان:</strong> علاقتنا الزوجية</p>
+    <p><strong>الحالة:</strong> أرباح معنوية مرتفعة جداً</p>
+    
+    <table style="width:100%; border-collapse:collapse; margin-top:20px; text-align:right;">
+        <thead>
+            <tr style="background:#f4f4f4;">
+                <th style="padding:10px; border:1px solid #ddd;">وصف الأصول</th>
+                <th style="padding:10px; border:1px solid #ddd;">القيمة</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td style="padding:10px; border:1px solid #ddd;">الذكريات المشتركة</td>
+                <td style="padding:10px; border:1px solid #ddd; color:#217346;">+∞ دائن</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; border:1px solid #ddd;">المشكلات المحلولة</td>
+                <td style="padding:10px; border:1px solid #ddd;">0.00 مدين</td>
+            </tr>
+            <tr>
+                <td style="padding:10px; border:1px solid #ddd;">إمكانات المستقبل</td>
+                <td style="padding:10px; border:1px solid #ddd; color:#217346;">غير محدودة</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <p style="margin-top:20px; font-weight:bold; border-top:2px solid #217346; padding-top:10px; font-size: 18px;">
+        إجمالي صافي القيمة: إلى الأبد
+    </p>
+    
+    <button onclick="document.getElementById('ledger-modal').style.display='none'" style="margin-top:10px; width:100%; padding:12px; background:#217346; color:white; border:none; cursor:pointer; font-weight:bold; font-size: 16px; border-radius: 4px;">
+        إغلاق التقرير
+    </button>
+</div>
+
     <div id="intro-container" class="overlay">
     <div id="intro-text">
         <span class="bar" id="left-bar">|</span>
@@ -48,7 +86,11 @@
         <span class="bar" id="right-bar">|</span>
     </div>
 </div>
-    
+    <button id="accountant-toggle" dir="rtl" style="position: fixed; bottom: 20px; left: 70%; transform: translateX(-50%); z-index: 1000; padding: 10px 20px; background: rgba(255,255,255,0.8); border: 2px solid #217346; border-radius: 20px; cursor: pointer; font-family: sans-serif;">
+    تبديل العرض (العمل / الحب) 📊
+</button>
+
+
     <div class="controls">
         <input type="file" id="audio-upload" accept="audio/*">
     </div>
