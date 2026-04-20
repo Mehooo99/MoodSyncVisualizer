@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { gsap } from 'gsap'; // Ensure you ran: npm install gsap
 
 let scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer;
-let heartMesh: THREE.Mesh, particleSystem: THREE.Group;
+let heartMesh: THREE.Mesh;
 let analyser: AnalyserNode, audioContext: AudioContext;
 let isPlaying = false;
 const raycaster = new THREE.Raycaster();
@@ -61,7 +61,6 @@ dollarMesh = createJewelDollar();
 scene.add(dollarMesh);
 
     heartParticles = createHeartPathParticles();
-    //scene.add(particleSystem);
     heartMesh.add(heartParticles);
 
     dollarParticles = createDollarPathParticles(); // Now it will find the name!
@@ -197,9 +196,6 @@ dollarParticles.children.forEach((obj) => {
     // 3. ROTATION: Rotate the main heart and the particle cloud
     heartMesh.rotation.y += currentSpeed;
     dollarMesh.rotation.y += currentSpeed;
-    // if (particleSystem) {
-    //     particleSystem.rotation.y += 0.01;
-    // }
 
     // 4. SYNC DATA: This is crucial! Tells Three.js to show the morphing 
     // progress happening in the GSAP toggle function.
