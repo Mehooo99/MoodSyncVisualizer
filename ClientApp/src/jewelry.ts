@@ -2,7 +2,7 @@ import * as THREE from 'three';
 
 let scene: THREE.Scene, camera: THREE.PerspectiveCamera, renderer: THREE.WebGLRenderer;
 let heartMesh: THREE.Mesh, particleSystem: THREE.Group;
-let analyser: AnalyserNode, dataArray: Uint8Array, audioContext: AudioContext;
+let analyser: AnalyserNode, audioContext: AudioContext;
 let isPlaying = false;
 const raycaster = new THREE.Raycaster();
 const mouse = new THREE.Vector2();
@@ -125,11 +125,9 @@ function getHeartPoint(t: number) {
     return { x: x * 0.4, y: y * 0.4 }; // Scale down to fit scene
 }
 
-const clock = new THREE.Clock();
 let currentSpeed = 0.005;
 function animate() {
     requestAnimationFrame(animate);
-    const delta = clock.getDelta();
 
     let intensity = 0;
     

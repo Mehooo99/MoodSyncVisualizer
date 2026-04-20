@@ -121,7 +121,7 @@ function animate() {
         const isMine = (index === myFlowerIndex);
     const displayIntensity = isMine ? localIntensity : data.intensity;
         
-        data.flower.draw(ctx, displayIntensity, canvas,isMine);
+        data.flower.draw(ctx, displayIntensity, canvas);
 
         // Spawn petals for anyone who is "peaking"
         if (displayIntensity > 0.7) {
