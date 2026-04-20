@@ -4,12 +4,43 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Jeweled Heart Visualizer</title>
-    <link rel="stylesheet" href="/jewelry.css">
+    <link rel="stylesheet" href="./src/jewelry.css">
 </head>
 <body>
     <div id="visualizer-container"></div>
 
     <div id="canvas-container"></div>
+    
+   <div id="surprise-modal" dir="rtl" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background: #fdfdfd; border: 3px double #2d5a27; padding: 30px; z-index: 9999; font-family: 'Arial', sans-serif; box-shadow: 0 0 20px rgba(0,0,0,0.3); min-width: 320px; color: #333;">
+    <h2 style="text-align: center; color: #2d5a27; margin-bottom: 5px;">تقرير المراجعة السنوي</h2>
+    <p style="text-align: center; font-size: 0.9rem; margin-bottom: 20px;">للسنة المنتهية في حب لا ينتهي</p>
+    
+    <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+        <tr style="background: #e8f5e9;">
+            <th style="border: 1px solid #ccc; padding: 8px; text-align: right;">البند (الأصول)</th>
+            <th style="border: 1px solid #ccc; padding: 8px; text-align: center;">القيمة التقديرية</th>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px;">ابتسامتكِ (أصول ثابتة)</td>
+            <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">لا تقدر بثمن</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px;">دعمكِ لي (احتياطي طوارئ)</td>
+            <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">غير محدود</td>
+        </tr>
+        <tr>
+            <td style="border: 1px solid #ccc; padding: 8px;">وجودكِ في حياتي (أرباح مستقاة)</td>
+            <td style="border: 1px solid #ccc; padding: 8px; text-align: center;">∞</td>
+        </tr>
+    </table>
+
+    <div style="background: #2d5a27; color: white; padding: 10px; text-align: center; font-weight: bold;">
+        النتيجة: الميزانية متوازنة تماماً بالحب
+    </div>
+
+    <button onclick="document.getElementById('surprise-modal').style.display='none'" style="margin-top: 15px; width: 100%; cursor: pointer; border: none; background: #ccc; padding: 5px;">إغلاق التقرير</button>
+</div>
+
     <div id="intro-container" class="overlay">
     <div id="intro-text">
         <span class="bar" id="left-bar">|</span>
@@ -24,6 +55,6 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-    <script type="module" src="/jewelry.ts"></script>
+    <script type="module" src="./src/jewelry.ts"></script>
 </body>
 </html>

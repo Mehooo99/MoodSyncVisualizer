@@ -10,6 +10,7 @@ let isPaused = false;
 
 const container = document.getElementById('canvas-container') as HTMLElement;
 const upload = document.getElementById('audio-upload') as HTMLInputElement;
+const contDev = document.getElementsByClassName('controls')[0] as HTMLElement;
 
 function init() {
     scene = new THREE.Scene();
@@ -181,10 +182,15 @@ function togglePlayPause() {
         audioContext.suspend();
         isPaused = true;
         isPlaying = false; // Stops the music visualizer data
+                    upload.style.display = 'block';
+            contDev.style.display='block';
+        showSurprise();
     } else if (audioContext.state === 'suspended') {
         audioContext.resume();
         isPaused = false;
         isPlaying = true;
+                    upload.style.display = 'none';
+            contDev.style.display='none';
     }
 }
 // --- Audio Handling ---
@@ -216,6 +222,7 @@ upload.onchange = (e) => {
             
             // Optional: Hide the upload button once playing to clean up the UI
             upload.style.display = 'none';
+            contDev.style.display='none';
         };
         reader.readAsArrayBuffer(file);
     }
@@ -287,7 +294,14 @@ async function startIntroSequence() {
 
     setTimeout(() => {
         overlay.style.opacity = '0';
-        setTimeout(() => {init(); overlay.style.display = 'none'; }, 1500);
+        setTimeout(() => {init();overlay.style.display = 'none'; }, 1500);
     }, 2000);
 }
+function showSurprise() {
+    const modal = document.getElementById('surprise-modal');
+    if(modal) modal.style.display = 'block';
+}
+
+
+
 window.addEventListener('DOMContentLoaded', startIntroSequence);
